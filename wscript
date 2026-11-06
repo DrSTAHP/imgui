@@ -16,6 +16,6 @@ def build(bld):
         name            = 'imgui',
         # export_includes powoduje, że każdy projekt używający 'imgui' 
         # automatycznie dostaje dostęp do tego folderu
-        export_includes = '.',
-        includes        = '.'
+        export_includes = '. backends',
+        includes        = '. backends'
     )
