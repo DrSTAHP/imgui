@@ -50,8 +50,12 @@
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     // Setup Dear ImGui style
+    ImGuiStyle& style = ImGui::GetStyle();
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
+    //style.FontSizeBase = 16.0f;           // Default to 13.0f when unspecified, which allows crisp legacy font for non-4K screens.
+    style.FrameRounding = 3.0f;
+    style.GrabRounding = 3.0f;
 
     // Setup Platform/Renderer backends
     ImGui_ImplOSX_Init(self);
@@ -59,13 +63,12 @@
 
     // Load Fonts
     // - If fonts are not explicitly loaded, Dear ImGui will select an embedded font: either AddFontDefaultVector() or AddFontDefaultBitmap().
-    //   This selection is based on (style.FontSizeBase * style.FontScaleMain * style.FontScaleDpi) reaching a small threshold.
+    //   This selection is based on (style.FontSizeBase * style.FontScaleMain * style.FontScaleDpi) reaching a threshold.
     // - You can load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
     // - If a file cannot be loaded, AddFont functions will return a nullptr. Please handle those errors in your code (e.g. use an assertion, display an error and quit).
     // - Read 'docs/FONTS.md' for more instructions and details.
     // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use FreeType for higher quality font rendering.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    //style.FontSizeBase = 20.0f;
     //io.Fonts->AddFontDefaultVector();
     //io.Fonts->AddFontDefaultBitmap();
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf");
@@ -188,19 +191,14 @@
 -(void)setupMenu
 {
     NSMenu* mainMenuBar = [[NSMenu alloc] init];
-    NSMenu* appMenu;
-    NSMenuItem* menuItem;
+    NSMenu* appMenu = [[NSMenu alloc] initWithTitle:@"Dear ImGui OSX+OpenGL2 Example"];
+    NSMenuItem* quitMenuItem = [appMenu addItemWithTitle:@"Quit" action:@selector(terminate:) keyEquivalent:@"q"];
+    [quitMenuItem setTarget:NSApp];
+    [quitMenuItem setKeyEquivalentModifierMask:NSEventModifierFlagCommand];
 
-    appMenu = [[NSMenu alloc] initWithTitle:@"Dear ImGui OSX+OpenGL2 Example"];
-    menuItem = [appMenu addItemWithTitle:@"Quit Dear ImGui OSX+OpenGL2 Example" action:@selector(terminate:) keyEquivalent:@"q"];
-    [menuItem setKeyEquivalentModifierMask:NSEventModifierFlagCommand];
-
-    menuItem = [[NSMenuItem alloc] init];
-    [menuItem setSubmenu:appMenu];
-
-    [mainMenuBar addItem:menuItem];
-
-    appMenu = nil;
+    NSMenuItem* appMenuItem = [[NSMenuItem alloc] init];
+    [appMenuItem setSubmenu:appMenu];
+    [mainMenuBar addItem:appMenuItem];
     [NSApp setMainMenu:mainMenuBar];
 }
 
@@ -211,10 +209,6 @@
 
 -(void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    // Make the application a foreground application (else it won't receive keyboard events)
-    ProcessSerialNumber psn = {0, kCurrentProcess};
-    TransformProcessType(&psn, kProcessTransformToForegroundApplication);
-
     // Menu
     [self setupMenu];
 
@@ -238,6 +232,8 @@
         NSLog(@"No OpenGL Context!");
 
     [view initialize];
+
+    [NSApp activateIgnoringOtherApps:YES];
 }
 
 @end
@@ -246,14 +242,17 @@
 // Application main() function
 //-----------------------------------------------------------------------------------
 
-int main(int argc, const char* argv[])
+int main(int, const char**)
 {
     @autoreleasepool
     {
-        NSApp = [NSApplication sharedApplication];
-        AppDelegate* delegate = [[AppDelegate alloc] init];
-        [[NSApplication sharedApplication] setDelegate:delegate];
+        [NSApplication sharedApplication];
+        [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+
+        AppDelegate* appDelegate = [[AppDelegate alloc] init];
+        [NSApp setDelegate:appDelegate];
+
         [NSApp run];
     }
-    return NSApplicationMain(argc, argv);
+    return 0;
 }
